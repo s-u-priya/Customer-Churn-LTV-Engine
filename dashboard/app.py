@@ -34,7 +34,6 @@ telecommunications customer data.
 """)
 
 st.sidebar.header("Customer Information")
-
 tenure = st.sidebar.slider(
     "Tenure Months",
     1,
