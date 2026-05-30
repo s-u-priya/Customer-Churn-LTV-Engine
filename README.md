@@ -1,133 +1,196 @@
-# Customer Churn Prediction & LTV Engine
+# Customer Churn Prediction & Lifetime Value (LTV) Engine
 
 ## Overview
 
-A machine learning project that predicts customer churn for a telecom business and provides customer retention insights.
+A machine learning-powered analytics system designed to predict customer churn and estimate Customer Lifetime Value (CLTV) for subscription-based businesses.
 
-The system analyzes customer demographics, subscription details, billing information, and service usage patterns to identify customers likely to leave the company.
+The project helps organizations identify customers at risk of leaving and prioritize retention strategies based on customer value.
+
+---
 
 ## Features
 
-* Data preprocessing and cleaning
-* Exploratory Data Analysis (EDA)
-* Churn Prediction using Logistic Regression
-* Random Forest comparison model
-* Feature Importance Analysis
-* Model Serialization using Joblib
-* FastAPI-based Prediction Service
+- Customer Churn Prediction
+- Customer Lifetime Value (CLTV) Analysis
+- Exploratory Data Analysis (EDA)
+- Feature Engineering
+- Logistic Regression Model
+- Random Forest Model
+- XGBoost Model
+- Feature Importance Analysis
+- SHAP Explainability
+- FastAPI REST API
+- Batch Prediction Endpoint
+- Streamlit Dashboard
+
+---
 
 ## Dataset
 
-Telco Customer Churn Dataset
+**Dataset:** Telco Customer Churn Dataset
 
-Dataset Size:
+**Records:** 7,043 customers
 
-* 7043 customers
-* 33 original features
+### Key Features
 
-Target Variable:
+- Gender
+- Senior Citizen
+- Partner
+- Dependents
+- Tenure Months
+- Contract Type
+- Internet Service
+- Monthly Charges
+- Total Charges
+- Churn Status
+- CLTV
 
-* Churn Value
+---
 
-  * 0 = Customer stays
-  * 1 = Customer churns
+## Tech Stack
 
-## Technologies Used
+### Languages
 
-### Programming
+- Python
+- SQL
 
-* Python
+### Libraries
 
-### Machine Learning
+- Pandas
+- NumPy
+- Scikit-Learn
+- XGBoost
+- SHAP
+- Joblib
 
-* Pandas
-* NumPy
-* Scikit-Learn
+### Backend
 
-### API
+- FastAPI
 
-* FastAPI
-* Uvicorn
+### Visualization
 
-### Model Storage
+- Streamlit
 
-* Joblib
+### Version Control
+
+- Git
+- GitHub
+
+---
+
+## Machine Learning Models
+
+| Model | Accuracy |
+|---------|----------|
+| Logistic Regression | 80.95% |
+| Random Forest | 80.03% |
+| XGBoost | 81.45% |
+
+### Best Model
+
+**XGBoost**
+
+Accuracy: **81.45%**
+
+---
 
 ## Project Structure
 
-Customer-Churn-LTV-Engine/
-
-├── api/
-
-├── data/
-
-├── models/
-
+```text
+Customer-Churn-LTV-Engine
+│
+├── api
+│   └── main.py
+│
+├── dashboard
+│   └── app.py
+│
+├── data
+│   └── telco_churn.xlsx
+│
+├── models
 │   └── churn_model.pkl
-
-├── src/
-
+│
+├── src
 │   ├── eda.py
-
 │   ├── preprocessing.py
-
 │   ├── train_model.py
-
 │   ├── random_forest.py
-
+│   ├── xgboost_model.py
 │   ├── feature_importance.py
-
-│   ├── save_model.py
-
+│   ├── shap_analysis.py
+│   ├── ltv_model.py
 │   └── predict.py
-
+│
 ├── requirements.txt
-
 └── README.md
+```
 
-## Model Performance
+---
 
-### Logistic Regression
+## API Endpoints
 
-* Accuracy: 80.95%
-* Churn Recall: 59%
-* Churn F1 Score: 0.63
+### General
 
-### Random Forest
+- GET /
 
-* Accuracy: 80.03%
-* Churn Recall: 51%
-* Churn F1 Score: 0.59
+Returns API information.
 
-## Top Churn Factors
+- GET /health
 
-1. Total Charges
-2. Tenure Months
-3. Monthly Charges
-4. Contract Type
-5. Online Security
-6. Payment Method
-7. Dependents
-8. Tech Support
+Health check endpoint.
 
-## Running the Project
+### Predictions
 
-Install dependencies:
+- POST /predict
 
-pip install -r requirements.txt
+Predict churn for a single customer.
 
-Run API:
+- POST /predict_batch
 
-python -m uvicorn api.main:app --reload
+Predict churn for multiple customers.
 
-Open Swagger UI:
+---
 
-http://127.0.0.1:8000/docs
+## Dashboard
+
+The Streamlit dashboard allows users to:
+
+- Enter customer information
+- Predict churn probability
+- View churn risk level
+- Compare model performance
+
+---
+
+## Explainability
+
+SHAP was used to explain model predictions and identify the most influential features affecting churn.
+
+---
+
+## Business Impact
+
+- Reduce customer acquisition costs
+- Improve customer retention
+- Prioritize high-value customers
+- Optimize marketing campaigns
+- Support data-driven decision making
+
+---
 
 ## Future Improvements
 
-* XGBoost model
-* SHAP explainability
-* PostgreSQL integration
-* Docker deployment
-* Interactive dashboards using Superset or Metabase
+- PostgreSQL Data Warehouse
+- Docker Deployment
+- Apache Superset Dashboard
+- Automated Model Retraining
+- Cloud Deployment (AWS/Azure)
+
+---
+
+## Author
+
+Supriya
+
+Data Analytics & Machine Learning Project
