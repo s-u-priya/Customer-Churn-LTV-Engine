@@ -1,196 +1,265 @@
-# Customer Churn Prediction & Lifetime Value (LTV) Engine
+# Customer Churn Prediction & LTV Engine
 
-## Overview
+## Project Overview
 
-A machine learning-powered analytics system designed to predict customer churn and estimate Customer Lifetime Value (CLTV) for subscription-based businesses.
+Customer Churn Prediction & Lifetime Value (LTV) Engine is an end-to-end machine learning project designed for telecommunications and subscription-based businesses.
 
-The project helps organizations identify customers at risk of leaving and prioritize retention strategies based on customer value.
+The system predicts whether a customer is likely to churn and calculates churn probability to help businesses identify customers requiring retention efforts.
+
+Predictions are served through FastAPI, stored in PostgreSQL, and visualized using Metabase dashboards.
 
 ---
 
 ## Features
 
-- Customer Churn Prediction
-- Customer Lifetime Value (CLTV) Analysis
-- Exploratory Data Analysis (EDA)
-- Feature Engineering
-- Logistic Regression Model
-- Random Forest Model
-- XGBoost Model
-- Feature Importance Analysis
-- SHAP Explainability
-- FastAPI REST API
-- Batch Prediction Endpoint
-- Streamlit Dashboard
-
----
-
-## Dataset
-
-**Dataset:** Telco Customer Churn Dataset
-
-**Records:** 7,043 customers
-
-### Key Features
-
-- Gender
-- Senior Citizen
-- Partner
-- Dependents
-- Tenure Months
-- Contract Type
-- Internet Service
-- Monthly Charges
-- Total Charges
-- Churn Status
-- CLTV
+* Customer churn prediction using Machine Learning
+* Churn probability scoring
+* Batch prediction for all customers
+* FastAPI REST API deployment
+* PostgreSQL prediction storage
+* Metabase dashboard visualization
+* Customer segmentation for high-risk users
 
 ---
 
 ## Tech Stack
 
-### Languages
+### Programming
 
-- Python
-- SQL
+* Python
 
-### Libraries
+### Data Processing
 
-- Pandas
-- NumPy
-- Scikit-Learn
-- XGBoost
-- SHAP
-- Joblib
+* Pandas
+* NumPy
+
+### Machine Learning
+
+* Scikit-learn
+* Logistic Regression
 
 ### Backend
 
-- FastAPI
+* FastAPI
+* Uvicorn
 
-### Visualization
+### Database
 
-- Streamlit
+* PostgreSQL
+* SQLAlchemy
 
-### Version Control
+### Dashboard
 
-- Git
-- GitHub
+* Metabase
 
 ---
 
-## Machine Learning Models
+## Project Architecture
 
-| Model | Accuracy |
-|---------|----------|
-| Logistic Regression | 80.95% |
-| Random Forest | 80.03% |
-| XGBoost | 81.45% |
-
-### Best Model
-
-**XGBoost**
-
-Accuracy: **81.45%**
+Dataset
+↓
+Data Cleaning & EDA
+↓
+Feature Engineering
+↓
+Model Training
+↓
+Pipeline Serialization (.pkl)
+↓
+FastAPI Deployment
+↓
+PostgreSQL Storage
+↓
+Metabase Dashboard
 
 ---
 
 ## Project Structure
 
-```text
-Customer-Churn-LTV-Engine
+```plaintext
+Customer_Churn_Project/
 │
-├── api
+├── api/
 │   └── main.py
 │
-├── dashboard
-│   └── app.py
+├── data/
+│   ├── raw/
+│   ├── processed_telco.csv
+│   └── final_predictions.csv
 │
-├── data
-│   └── telco_churn.xlsx
+├── models/
+│   ├── churn_model.pkl
+│   └── churn_pipeline.pkl
 │
-├── models
-│   └── churn_model.pkl
+├── notebooks/
+│   ├── EDA.py
+│   ├── Modeling.py
+│   ├── Test_Model.py
+│   ├── batch_predict.py
+│   └── save_predictions.py
 │
-├── src
-│   ├── eda.py
-│   ├── preprocessing.py
-│   ├── train_model.py
-│   ├── random_forest.py
-│   ├── xgboost_model.py
-│   ├── feature_importance.py
-│   ├── shap_analysis.py
-│   ├── ltv_model.py
-│   └── predict.py
+├── dashboard/
+│   └── metabase.jar
+│
+├── screenshots/
 │
 ├── requirements.txt
-└── README.md
+├── README.md
 ```
+
+---
+
+## Model Performance
+
+### Logistic Regression
+
+Accuracy: **82.11%**
+
+Classification Report:
+
+| Metric    | Value |
+| --------- | ----- |
+| Precision | 0.69  |
+| Recall    | 0.60  |
+| F1 Score  | 0.64  |
 
 ---
 
 ## API Endpoints
 
-### General
+### Health Check
 
-- GET /
+```http
+GET /
+```
 
-Returns API information.
+Response:
 
-- GET /health
-
-Health check endpoint.
-
-### Predictions
-
-- POST /predict
-
-Predict churn for a single customer.
-
-- POST /predict_batch
-
-Predict churn for multiple customers.
+```json
+{
+  "message": "Customer Churn API Running"
+}
+```
 
 ---
 
-## Dashboard
+### Predict Customer Churn
 
-The Streamlit dashboard allows users to:
+```http
+POST /predict_churn
+```
 
-- Enter customer information
-- Predict churn probability
-- View churn risk level
-- Compare model performance
+Example Request:
+
+```json
+{
+  "gender":"Female",
+  "SeniorCitizen":0,
+  "Partner":"Yes",
+  "Dependents":"No",
+  "tenure":2,
+  "PhoneService":"Yes",
+  "MultipleLines":"No",
+  "InternetService":"Fiber optic",
+  "OnlineSecurity":"No",
+  "OnlineBackup":"No",
+  "DeviceProtection":"No",
+  "TechSupport":"No",
+  "StreamingTV":"Yes",
+  "StreamingMovies":"Yes",
+  "Contract":"Month-to-month",
+  "PaperlessBilling":"Yes",
+  "PaymentMethod":"Electronic check",
+  "MonthlyCharges":120,
+  "TotalCharges":240,
+  "Revenue":240
+}
+```
+
+Example Response:
+
+```json
+{
+  "prediction":"CHURN",
+  "probability":73.08
+}
+```
 
 ---
 
-## Explainability
+## How To Run
 
-SHAP was used to explain model predictions and identify the most influential features affecting churn.
+### Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run API
+
+```bash
+python -m uvicorn api.main:app --reload
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/docs
+```
 
 ---
 
-## Business Impact
+### Run Batch Prediction
 
-- Reduce customer acquisition costs
-- Improve customer retention
-- Prioritize high-value customers
-- Optimize marketing campaigns
-- Support data-driven decision making
+```bash
+python notebooks/batch_predict.py
+```
+
+---
+
+### Save Predictions To PostgreSQL
+
+```bash
+python notebooks/save_predictions.py
+```
+
+---
+
+### Run Dashboard
+
+```bash
+cd dashboard
+java -jar metabase.jar
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Dashboard Metrics
+
+* Total Predictions
+* Average Churn Risk
+* Prediction Distribution
+* Average Monthly Charges
+* High Risk Customers
 
 ---
 
 ## Future Improvements
 
-- PostgreSQL Data Warehouse
-- Docker Deployment
-- Apache Superset Dashboard
-- Automated Model Retraining
-- Cloud Deployment (AWS/Azure)
+* Customer Lifetime Value (LTV)
+* Docker deployment
+* Cloud deployment
+* Real-time prediction pipeline
+* Automated retraining
 
 ---
 
 ## Author
 
 Supriya
-
-Data Analytics & Machine Learning Project
