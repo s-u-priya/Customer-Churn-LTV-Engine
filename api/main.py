@@ -1,182 +1,118 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import List
-import joblib
+from sqlalchemy import create_engine
 import pandas as pd
+import joblib
 
-app = FastAPI(
-    title="Customer Churn Prediction API",
-    description="""
-    Predict customer churn risk using a machine learning model.
+app = FastAPI()
 
-    Features:
-    - Single Customer Prediction
-    - Batch Prediction
-    - Probability Scores
-    - XGBoost Model
-    """,
-    version="1.0.0"
+# Load pipeline
+pipeline = joblib.load(
+    "models/churn_pipeline.pkl"
 )
 
-# Load model
-model = joblib.load("models/churn_model.pkl")
+# PostgreSQL connection
+engine = create_engine(
+    "postgresql://postgres:%40Supriya8116@localhost:5432/telecom_db"
+)
 
 
 class Customer(BaseModel):
-    Gender: int
-    Senior_Citizen: int
-    Partner: int
-    Dependents: int
-    Tenure_Months: int
-    Phone_Service: int
-    Multiple_Lines: int
-    Internet_Service: int
-    Online_Security: int
-    Online_Backup: int
-    Device_Protection: int
-    Tech_Support: int
-    Streaming_TV: int
-    Streaming_Movies: int
-    Contract: int
-    Paperless_Billing: int
-    Payment_Method: int
-    Monthly_Charges: float
-    Total_Charges: float
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "Gender": 0,
-                "Senior_Citizen": 0,
-                "Partner": 1,
-                "Dependents": 0,
-                "Tenure_Months": 12,
-                "Phone_Service": 1,
-                "Multiple_Lines": 0,
-                "Internet_Service": 1,
-                "Online_Security": 0,
-                "Online_Backup": 1,
-                "Device_Protection": 0,
-                "Tech_Support": 0,
-                "Streaming_TV": 1,
-                "Streaming_Movies": 1,
-                "Contract": 0,
-                "Paperless_Billing": 1,
-                "Payment_Method": 2,
-                "Monthly_Charges": 75.5,
-                "Total_Charges": 900.0
-            }
-        }
+    gender: str
+    SeniorCitizen: int
+    Partner: str
+    Dependents: str
+    tenure: int
+    PhoneService: str
+    MultipleLines: str
+    InternetService: str
+    OnlineSecurity: str
+    OnlineBackup: str
+    DeviceProtection: str
+    TechSupport: str
+    StreamingTV: str
+    StreamingMovies: str
+    Contract: str
+    PaperlessBilling: str
+    PaymentMethod: str
+    MonthlyCharges: float
+    TotalCharges: float
+    Revenue: float
 
 
-@app.get("/", tags=["General"])
+@app.get("/")
 def home():
     return {
-        "project": "Customer Churn Prediction & LTV Engine",
-        "model": "XGBoost",
-        "accuracy": "81.45%",
-        "version": "1.0.0",
-        "status": "Running"
+        "message": "Customer Churn API Running"
     }
 
 
-@app.get("/health", tags=["General"])
-def health_check():
-    return {
-        "status": "healthy"
-    }
-
-
-@app.post("/predict", tags=["Predictions"])
+@app.post("/predict_churn")
 def predict(customer: Customer):
 
-    data = pd.DataFrame([{
-        "Gender": customer.Gender,
-        "Senior Citizen": customer.Senior_Citizen,
-        "Partner": customer.Partner,
-        "Dependents": customer.Dependents,
-        "Tenure Months": customer.Tenure_Months,
-        "Phone Service": customer.Phone_Service,
-        "Multiple Lines": customer.Multiple_Lines,
-        "Internet Service": customer.Internet_Service,
-        "Online Security": customer.Online_Security,
-        "Online Backup": customer.Online_Backup,
-        "Device Protection": customer.Device_Protection,
-        "Tech Support": customer.Tech_Support,
-        "Streaming TV": customer.Streaming_TV,
-        "Streaming Movies": customer.Streaming_Movies,
-        "Contract": customer.Contract,
-        "Paperless Billing": customer.Paperless_Billing,
-        "Payment Method": customer.Payment_Method,
-        "Monthly Charges": customer.Monthly_Charges,
-        "Total Charges": customer.Total_Charges
-    }])
+    df = pd.DataFrame([
+        customer.model_dump()
+    ])
 
-    prediction = int(model.predict(data)[0])
-    probability = float(model.predict_proba(data)[0][1])
+    prediction = pipeline.predict(
+        df
+    )[0]
 
-    risk = "Low"
+    probability = (
+        pipeline
+        .predict_proba(df)[0][1]
+    )
 
-    if probability >= 0.7:
-        risk = "High"
-    elif probability >= 0.3:
-        risk = "Medium"
+    result = pd.DataFrame([{
+
+"customerID":
+f"CUST_{customer.tenure}_{int(customer.MonthlyCharges)}",
+
+"tenure":
+customer.tenure,
+
+"MonthlyCharges":
+customer.MonthlyCharges,
+
+"Prediction":
+(
+"CHURN"
+if prediction == 1
+else "STAY"
+),
+
+"Churn_Probability":
+round(
+probability*100,
+2
+),
+
+"Predicted_LTV":
+round(
+customer.MonthlyCharges *
+customer.tenure *
+0.85,
+2
+)
+
+}])
+
+    result.to_sql(
+        "customer_predictions",
+        engine,
+        if_exists="append",
+        index=False
+    )
 
     return {
-        "prediction": prediction,
-        "churn_probability": round(probability, 4),
-        "risk_level": risk
+        "prediction":
+            "CHURN"
+            if prediction == 1
+            else "STAY",
+
+        "probability":
+            round(
+                probability * 100,
+                2
+            )
     }
-
-
-@app.post("/predict_batch", tags=["Predictions"])
-def predict_batch(customers: List[Customer]):
-
-    rows = []
-
-    for customer in customers:
-        rows.append({
-            "Gender": customer.Gender,
-            "Senior Citizen": customer.Senior_Citizen,
-            "Partner": customer.Partner,
-            "Dependents": customer.Dependents,
-            "Tenure Months": customer.Tenure_Months,
-            "Phone Service": customer.Phone_Service,
-            "Multiple Lines": customer.Multiple_Lines,
-            "Internet Service": customer.Internet_Service,
-            "Online Security": customer.Online_Security,
-            "Online Backup": customer.Online_Backup,
-            "Device Protection": customer.Device_Protection,
-            "Tech Support": customer.Tech_Support,
-            "Streaming TV": customer.Streaming_TV,
-            "Streaming Movies": customer.Streaming_Movies,
-            "Contract": customer.Contract,
-            "Paperless Billing": customer.Paperless_Billing,
-            "Payment Method": customer.Payment_Method,
-            "Monthly Charges": customer.Monthly_Charges,
-            "Total Charges": customer.Total_Charges
-        })
-
-    df = pd.DataFrame(rows)
-
-    predictions = model.predict(df)
-    probabilities = model.predict_proba(df)[:, 1]
-
-    results = []
-
-    for pred, prob in zip(predictions, probabilities):
-
-        risk = "Low"
-
-        if prob >= 0.7:
-            risk = "High"
-        elif prob >= 0.3:
-            risk = "Medium"
-
-        results.append({
-            "prediction": int(pred),
-            "churn_probability": round(float(prob), 4),
-            "risk_level": risk
-        })
-
-    return results
